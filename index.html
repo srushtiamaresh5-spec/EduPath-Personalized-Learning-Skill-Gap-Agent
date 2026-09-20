@@ -1,669 +1,623 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EduPath — Personalized Learning Agent</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduPath: Personalized Learning & Skill Gap Agent v2.0</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode: "class",
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            ink: "#111827",
-            brand: "#7c3aed",
-            cyanx: "#06b6d4"
-                     soft: "0 20px 60px rgba(15, 23, 42, .12)"
+            brand: {
+              50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+            },
+            accent: {
+              500: '#8b5cf6', 600: '#7c3aed',
+            }
           }
         }
       }
     };
   </script>
-
   <style>
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      background:
-        radial-gradient(circle at top left, rgba(124, 58, 237, .12), transparent 28rem),
-        radial-gradient(circle at 85% 10%, rgba(6, 182, 212, .1), transparent 25rem),
-        #f8fafc;
-    }
-
-    .dark body {
-      background:
-        radial-gradient(circle at top left, rgba(124, 58, 237, .18), transparent 28rem),
-        radial-gradient(circle at 85% 10%, rgba(6, 182, 212, .12), transparent 25rem),
-        #080d1a;
-    }
-
-    .glass {
-      backdrop-filter: blur(20px);
-      background: rgba(255, 255, 255, .76);
-      border: 1px solid rgba(226, 232, 240, .9);
-    }
-
-    .dark .glass {
-      background: rgba(15, 23, 42, .72);
-      border-color: rgba(51, 65, 85, .8);
-    }
-
-    .mesh {
-      background-image:
-        linear-gradient(rgba(148, 163, 184, .08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(148, 163, 184, .08) 1px, transparent 1px);
-      background-size: 28px 28px;
-    }
-
-    .chat-scroll::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    .chat-scroll::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 999px;
-    }
-
-    .dark .chat-scroll::-webkit-scrollbar-thumb {
-      background: #475569;
-    }
-
-    .animate-in {
-      animation: rise .45s ease both;
-    }
-
-    @keyframes rise {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .typing-dot {
-      animation: blink 1.2s infinite;
-    }
-
-    .typing-dot:nth-child(2) {
-      animation-delay: .15s;
-    }
-
-    .typing-dot:nth-child(3) {
-      animation-delay: .3s;
-    }
-
-    @keyframes blink {
-      0%, 80%, 100% { opacity: .25; transform: translateY(0); }
-      40% { opacity: 1; transform: translateY(-3px); }
-    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.4); }
+    ::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.5); border-radius: 9999px; }
   </style>
 </head>
+<body class="bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 min-h-screen font-sans antialiased pb-20">
 
-<body class="min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
-  <div class="min-h-screen">
-    <!-- Header -->
-    <header class="sticky top-0 z-40 border-b border-slate-200/70 bg-white/75 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/75">
-      <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
-        <a href="#" class="flex items-center gap-3">
-          <div class="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-violet-600 to-cyan-500 text-xl font-black text-white shadow-lg shadow-violet-500/20">
-            E
-          </div>
-          <div>
-            <div class="font-black tracking-tight">EduPath</div>
-            <div class="text-[10px] font-semibold uppercase tracking-[.22em] text-slate-400">Learning agent</div>
-          </div>
-        </a>
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
-        <div class="flex items-center gap-3">
-          <span class="hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 sm:inline-flex dark:border-emerald-900/70 dark:bg-emerald-950/40 dark:text-emerald-300">
-            <span class="mr-2 mt-0.5 h-2 w-2 rounded-full bg-emerald-500"></span>
-            Agent online
-          </span>
-          <button id="themeBtn" class="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-600 transition hover:border-violet-300 hover:text-violet-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" aria-label="Toggle theme">
-            <svg id="sunIcon" class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.36-6.36-.7.7M6.34 17.66l-.7.7m12.02 0-.7-.7M6.34 6.34l-.7-.7M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/>
-            </svg>
-            <svg id="moonIcon" class="h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.6 6.6 0 0 0 21 12.8Z"/>
-            </svg>
-          </button>
+  <!-- Header Navigation -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-[#0b0f19]/85 border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-accent-500 flex items-center justify-center shadow-lg shadow-brand-500/25 text-white font-black text-lg">
+          E
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-base tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-brand-600 via-indigo-500 to-accent-500">EduPath</span>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800">v2.0</span>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">AI Learning & Skill Gap Agent</p>
         </div>
       </div>
-    </header>
 
-    <main class="mx-auto max-w-7xl px-5 py-10 lg:px-8 lg:py-14">
-      <!-- Hero -->
-      <section class="mb-10 grid items-center gap-8 lg:grid-cols-[1.15fr_.85fr]">
-        <div>
-          <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-700 dark:border-violet-900/70 dark:bg-violet-950/40 dark:text-violet-300">
-            <span>✦</span> Your AI-powered career co-pilot
-          </div>
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition">Dashboard</button>
+        <button onclick="switchTab('roadmap')" id="nav-roadmap" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Roadmap</button>
+        <button onclick="switchTab('notes')" id="nav-notes" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Notes Hub</button>
+        <button onclick="switchTab('quiz')" id="nav-quiz" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Quizzes</button>
+      </nav>
 
-          <h1 class="max-w-3xl text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
-            Turn your ambition into a
-            <span class="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">clear path forward.</span>
-          </h1>
-
-          <p class="mt-5 max-w-2xl text-base leading-7 text-slate-500 dark:text-slate-400 sm:text-lg">
-            EduPath analyzes your experience, identifies high-impact skill gaps, and adapts your weekly learning plan as you progress.
-          </p>
-
-          <div class="mt-7 flex flex-wrap gap-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
-            <span class="flex items-center gap-2"><span class="grid h-6 w-6 place-items-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60">✓</span> Personalized roadmap</span>
-            <span class="flex items-center gap-2"><span class="grid h-6 w-6 place-items-center rounded-full bg-cyan-100 text-cyan-600 dark:bg-cyan-950/60">✓</span> Adaptive coaching</span>
-          </div>
+      <div class="flex items-center gap-3">
+        <!-- Streak Widget Badge -->
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-500 text-xs font-bold">
+          <span>🔥</span> <span id="headerStreakCount">5</span> Days
         </div>
 
-        <div class="glass mesh relative overflow-hidden rounded-3xl p-6 shadow-soft">
-          <div class="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-violet-500/15 blur-2xl"></div>
-          <div class="relative">
-            <div class="mb-5 flex items-center justify-between">
+        <!-- Profile Modal Button -->
+        <button onclick="openProfileModal()" class="flex items-center gap-2 p-1.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <div id="headerAvatar" class="w-7 h-7 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-xs">U</div>
+        </button>
+
+        <button onclick="toggleDarkMode()" class="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <svg class="w-4 h-4 dark:hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+          <svg class="w-4 h-4 hidden dark:block text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Viewport -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+
+    <!-- TAB 1: DASHBOARD & SETUP -->
+    <div id="view-dashboard" class="space-y-6">
+      
+      <!-- Top Grid: Ingestion & Profile Overview -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Ingestion Hub Form -->
+        <div class="lg:col-span-7 bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+            <h2 class="text-sm font-bold text-slate-900 dark:text-white">Skill & Resume Ingestion Hub</h2>
+            <button onclick="loadSampleProfile()" class="text-xs text-brand-600 dark:text-brand-400 font-semibold hover:underline">Load Sample Profile</button>
+          </div>
+
+          <form id="ingestForm" onsubmit="handleGeneratePath(event)" class="space-y-4 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Current Skills (comma separated)</label>
+              <input type="text" id="inputSkills" value="JavaScript, React, HTML/CSS, Git" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <div class="text-xs font-bold uppercase tracking-widest text-slate-400">Live learner snapshot</div>
-                <div class="mt-1 font-bold">Frontend Engineer track</div>
-              </div>
-              <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">In progress</span>
-            </div>
-
-            <div class="mb-5 flex items-center gap-4">
-              <div class="relative grid h-20 w-20 place-items-center rounded-full" style="background: conic-gradient(#8b5cf6 0 68%, #e2e8f0 68% 100%)">
-                <div class="grid h-14 w-14 place-items-center rounded-full bg-white text-lg font-black dark:bg-slate-900">68%</div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Current Role / Status</label>
+                <input type="text" id="inputCurrentRole" value="Junior Frontend Dev" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none">
               </div>
               <div>
-                <div class="font-bold">Strong momentum</div>
-                <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">You are 3 skills away from your target role.</p>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Role</label>
+                <input type="text" id="inputTargetRole" value="Full-Stack AI Engineer" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none">
               </div>
             </div>
 
-            <div class="space-y-3">
-              <div class="flex items-center justify-between text-xs font-semibold">
-                <span>JavaScript depth</span><span class="text-violet-600">82%</span>
-              </div>
-              <div class="h-2 rounded-full bg-slate-200 dark:bg-slate-700"><div class="h-2 w-[82%] rounded-full bg-violet-500"></div></div>
-              <div class="flex items-center justify-between text-xs font-semibold">
-                <span>System design</span><span class="text-cyan-600">46%</span>
-              </div>
-              <div class="h-2 rounded-full bg-slate-200 dark:bg-slate-700"><div class="h-2 w-[46%] rounded-full bg-cyan-500"></div></div>
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Resume / Career Goal Notes (PDF Text Simulator)</label>
+              <textarea id="inputResumeText" rows="2" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none" placeholder="Paste resume details or paste project text...">Building responsive web applications with React and Tailwind. Looking to master AI agentic frameworks, LangChain, and vector databases.</textarea>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- Input panel -->
-      <section id="setup" class="glass rounded-3xl p-5 shadow-soft sm:p-8">
-        <div class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
-            <div class="mb-2 text-xs font-bold uppercase tracking-[.2em] text-violet-600">01 / Tell us about you</div>
-            <h2 class="text-2xl font-black tracking-tight sm:text-3xl">Build your learning profile</h2>
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">The more context you share, the more focused your path becomes.</p>
-          </div>
-          <div class="hidden items-center gap-2 text-xs font-semibold text-slate-400 sm:flex">
-            <span class="h-2 w-2 rounded-full bg-violet-500"></span> Takes less than 2 minutes
-          </div>
-        </div>
-
-        <form id="profileForm" class="grid gap-5 lg:grid-cols-2">
-          <label class="block">
-            <span class="mb-2 block text-sm font-bold">Current skills & experience</span>
-            <textarea id="skills" required rows="5" class="w-full resize-none rounded-2xl border border-slate-200 bg-white/80 px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900/70" placeholder="e.g. HTML, CSS, JavaScript fundamentals, 1 year building small web apps..."></textarea>
-          </label>
-
-          <div class="space-y-5">
-            <label class="block">
-              <span class="mb-2 block text-sm font-bold">Target role</span>
-              <input id="role" required class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900/70" placeholder="e.g. Senior Frontend Engineer" />
-            </label>
-
-            <label class="block">
-              <span class="mb-2 block text-sm font-bold">Career goal</span>
-              <input id="goal" required class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900/70" placeholder="e.g. Get job-ready in 3 months" />
-            </label>
-          </div>
-
-          <div class="lg:col-span-2">
-            <span class="mb-2 block text-sm font-bold">Resume <span class="font-normal text-slate-400">(optional)</span></span>
-            <div id="dropZone" class="group rounded-2xl border-2 border-dashed border-slate-200 bg-white/50 p-5 transition hover:border-violet-400 hover:bg-violet-50/40 dark:border-slate-700 dark:bg-slate-900/40 dark:hover:border-violet-500 dark:hover:bg-violet-950/20">
-              <div class="flex flex-col items-center justify-center gap-3 text-center sm:flex-row sm:text-left">
-                <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-violet-100 text-2xl dark:bg-violet-950/60">📄</div>
-                <div class="flex-1">
-                  <div class="font-bold">Drop your resume here or browse</div>
-                  <div id="fileName" class="mt-1 text-xs text-slate-500 dark:text-slate-400">PDF up to 10 MB, or paste your resume text below</div>
-                </div>
-                <label class="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-violet-400 hover:text-violet-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                  Browse files
-                  <input id="resumeFile" type="file" accept=".pdf,.txt" class="hidden" />
-                </label>
-              </div>
-              <textarea id="resumeText" rows="2" class="mt-4 w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-violet-500 dark:border-slate-700 dark:bg-slate-900" placeholder="Or paste a resume summary here..."></textarea>
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center lg:col-span-2">
-            <button id="generateBtn" type="submit" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-violet-600/20 transition hover:-translate-y-0.5 hover:shadow-violet-600/30 disabled:cursor-not-allowed disabled:opacity-70">
-              <span id="generateIcon">✦</span>
-              <span id="generateText">Generate my learning path</span>
+            <button type="submit" class="w-full py-3 bg-gradient-to-r from-brand-600 via-indigo-600 to-accent-600 text-white font-bold rounded-xl shadow-lg shadow-brand-500/20 hover:opacity-90 transition">
+              Run Gap Analysis & Generate Roadmap
             </button>
-            <span class="text-xs text-slate-400">Your profile stays in this browser for this demo.</span>
-          </div>
-        </form>
-      </section>
+          </form>
+        </div>
 
-      <!-- Results -->
-      <section id="results" class="mt-10 hidden space-y-6">
-        <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <!-- Gamification & Streak Maintainer Card -->
+        <div class="lg:col-span-5 bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col justify-between space-y-4">
           <div>
-            <div class="mb-2 text-xs font-bold uppercase tracking-[.2em] text-violet-600">02 / Your personalized path</div>
-            <h2 id="resultTitle" class="text-3xl font-black tracking-tight">Your path to becoming a Frontend Engineer</h2>
-            <p id="resultSubtitle" class="mt-2 text-sm text-slate-500 dark:text-slate-400"></p>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white">Streak Maintainer</h3>
+              <span class="px-2 py-1 bg-amber-500/10 text-amber-500 font-bold rounded-lg text-[10px]">🔥 Active Streak</span>
+            </div>
+            
+            <div class="flex items-center justify-around bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+              <div>
+                <p id="statStreakDays" class="text-3xl font-black text-amber-500">5</p>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mt-0.5">Days Streak</p>
+              </div>
+              <div class="h-8 w-px bg-slate-200 dark:bg-slate-800"></div>
+              <div>
+                <p id="statStudyGoal" class="text-3xl font-black text-brand-500">45m</p>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mt-0.5">Daily Goal</p>
+              </div>
+            </div>
           </div>
-          <button id="resetBtn" class="self-start rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 transition hover:border-violet-400 hover:text-violet-600 dark:border-slate-700 dark:text-slate-300">Start over</button>
+
+          <!-- Weekly Check-in Calendar -->
+          <div>
+            <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Weekly Check-in Activity</p>
+            <div class="grid grid-cols-7 gap-2 text-center">
+              <div>
+                <div class="w-full h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">✓</div>
+                <span class="text-[10px] text-slate-500 mt-1 block">Mon</span>
+              </div>
+              <div>
+                <div class="w-full h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">✓</div>
+                <span class="text-[10px] text-slate-500 mt-1 block">Tue</span>
+              </div>
+              <div>
+                <div class="w-full h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">✓</div>
+                <span class="text-[10px] text-slate-500 mt-1 block">Wed</span>
+              </div>
+              <div>
+                <div class="w-full h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">✓</div>
+                <span class="text-[10px] text-slate-500 mt-1 block">Thu</span>
+              </div>
+              <div>
+                <div class="w-full h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">✓</div>
+                <span class="text-[10px] text-slate-500 mt-1 block">Fri</span>
+              </div>
+              <div>
+                <div class="w-full h-8 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-xs font-bold">·</div>
+                <span class="text-[10px] text-slate-500 mt-1 block">Sat</span>
+              </div>
+              <div>
+                <div class="w-full h-8 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-xs font-bold">·</div>
+                <span class="text-[10px] text-slate-500 mt-1 block">Sun</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reminder Toggle Settings -->
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+            <div>
+              <p class="font-semibold text-slate-800 dark:text-slate-200">Daily Study Reminders</p>
+              <p class="text-[10px] text-slate-500">Push notification simulation</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="reminderToggle" checked onchange="toggleReminders(this)" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-600"></div>
+            </label>
+          </div>
         </div>
 
-        <div class="grid gap-6 xl:grid-cols-[1.05fr_.95fr]">
-          <!-- Gap analysis -->
-          <div class="glass rounded-3xl p-6 shadow-soft">
-            <div class="mb-6 flex items-start justify-between">
-              <div>
-                <h3 class="text-lg font-black">Skill gap analysis</h3>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">What to strengthen for your target role.</p>
-              </div>
-              <div class="grid h-12 w-12 place-items-center rounded-2xl bg-violet-100 text-lg font-black text-violet-700 dark:bg-violet-950/60 dark:text-violet-300">68%</div>
-            </div>
+      </div>
 
-            <div class="mb-7 h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-              <div class="h-full w-[68%] rounded-full bg-gradient-to-r from-violet-500 to-cyan-500"></div>
+      <!-- Skill Gap Analysis Diagnostic Banner -->
+      <div class="bg-gradient-to-br from-slate-900 via-[#111827] to-indigo-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div class="lg:col-span-8">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-brand-500/20 text-brand-400 text-[10px] font-bold border border-brand-500/30 uppercase">Diagnostic Engine Active</span>
             </div>
-
-            <div class="grid gap-6 sm:grid-cols-2">
-              <div>
-                <div class="mb-3 flex items-center gap-2 text-sm font-bold"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span> Current strengths</div>
-                <div id="strengths" class="space-y-2"></div>
-              </div>
-              <div>
-                <div class="mb-3 flex items-center gap-2 text-sm font-bold"><span class="h-2.5 w-2.5 rounded-full bg-amber-500"></span> Priority gaps</div>
-                <div id="gaps" class="space-y-2"></div>
-              </div>
+            <h2 class="text-2xl font-black text-white">Skill Gap Analysis & Match Breakdown</h2>
+            <p id="analysisDescription" class="mt-2 text-xs sm:text-sm text-slate-300">Your profile aligns well with frontend core requirements. Major missing vectors detected in Vector Databases, LangChain orchestration, and RAG architectures.</p>
+            
+            <div id="missingGapsTags" class="flex flex-wrap gap-2 mt-4">
+              <span class="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 text-xs font-semibold border border-rose-500/20">Vector DBs (Pinecone)</span>
+              <span class="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 text-xs font-semibold border border-rose-500/20">LangChain Framework</span>
+              <span class="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 text-xs font-semibold border border-rose-500/20">RAG Pipelines</span>
             </div>
           </div>
-
-          <!-- Quick stats -->
-          <div class="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
-            <div class="glass rounded-3xl p-5 shadow-soft">
-              <div class="mb-3 flex items-center justify-between">
-                <span class="text-sm font-bold text-slate-500 dark:text-slate-400">Estimated effort</span>
-                <span class="text-xl">⏱️</span>
-              </div>
-              <div class="text-2xl font-black">6–8 hrs/week</div>
-              <div class="mt-1 text-xs text-slate-400">Focused, sustainable progress</div>
-            </div>
-            <div class="glass rounded-3xl p-5 shadow-soft">
-              <div class="mb-3 flex items-center justify-between">
-                <span class="text-sm font-bold text-slate-500 dark:text-slate-400">Learning horizon</span>
-                <span class="text-xl">🗓️</span>
-              </div>
-              <div class="text-2xl font-black">4 weeks</div>
-              <div class="mt-1 text-xs text-slate-400">Adaptable to your pace</div>
-            </div>
-            <div class="glass rounded-3xl p-5 shadow-soft">
-              <div class="mb-3 flex items-center justify-between">
-                <span class="text-sm font-bold text-slate-500 dark:text-slate-400">Next milestone</span>
-                <span class="text-xl">🏁</span>
-              </div>
-              <div class="text-2xl font-black">Ship a project</div>
-              <div class="mt-1 text-xs text-slate-400">Prove your skills in public</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Roadmap + Chat -->
-        <div class="grid gap-6 xl:grid-cols-[1.05fr_.95fr]">
-          <div class="glass rounded-3xl p-6 shadow-soft">
-            <div class="mb-6 flex items-center justify-between">
-              <div>
-                <h3 class="text-lg font-black">Adaptive weekly roadmap</h3>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Complete tasks to unlock your next milestone.</p>
-              </div>
-              <span id="completionBadge" class="rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">0% complete</span>
-            </div>
-            <div id="roadmap" class="space-y-4"></div>
-          </div>
-
-          <div class="glass flex min-h-[600px] flex-col overflow-hidden rounded-3xl shadow-soft">
-            <div class="border-b border-slate-200/80 p-5 dark:border-slate-800">
-              <div class="flex items-center gap-3">
-                <div class="relative grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-violet-600 to-cyan-500 text-xl text-white">
-                  ✦
-                  <span class="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900"></span>
-                </div>
-                <div>
-                  <h3 class="font-black">EduPath Agent</h3>
-                  <p class="text-xs text-emerald-600">Adaptive coach · Online now</p>
-                </div>
-              </div>
-            </div>
-
-            <div id="chatMessages" class="chat-scroll flex-1 space-y-4 overflow-y-auto p-5"></div>
-
-            <div class="border-t border-slate-200/80 p-4 dark:border-slate-800">
-              <div class="mb-3 flex flex-wrap gap-2">
-                <button class="promptBtn rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-violet-100 hover:text-violet-700 dark:bg-slate-800 dark:text-slate-300" data-prompt="I finished week 1. What should I focus on next?">I finished week 1</button>
-                <button class="promptBtn rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-violet-100 hover:text-violet-700 dark:bg-slate-800 dark:text-slate-300" data-prompt="I am struggling with async JavaScript. Can you adjust my plan?">Help with async JS</button>
-              </div>
-              <form id="chatForm" class="flex items-center gap-2">
-                <input id="chatInput" class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm outline-none focus:border-violet-500 dark:border-slate-700 dark:bg-slate-900" placeholder="Ask your agent anything..." autocomplete="off" />
-                <button class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-violet-600 text-white transition hover:bg-violet-700" aria-label="Send message">➤</button>
-              </form>
+          <div class="lg:col-span-4 flex flex-col items-center justify-center bg-slate-800/40 rounded-2xl p-6 border border-slate-700/40 text-center">
+            <span id="readinessScoreVal" class="text-4xl font-black text-emerald-400">62%</span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Target Role Readiness</span>
+            <div class="w-full bg-slate-700 h-2 rounded-full mt-4 overflow-hidden">
+              <div id="readinessBar" class="bg-emerald-500 h-full w-[62%] transition-all duration-1000"></div>
             </div>
           </div>
         </div>
-      </section>
-    </main>
+      </div>
 
-    <footer class="mx-auto max-w-7xl px-5 pb-8 pt-4 text-center text-xs text-slate-400 lg:px-8">
-      EduPath demo · Built for focused, human-paced learning
-    </footer>
+    </div>
+
+    <!-- TAB 2: ROADMAP VIEW -->
+    <div id="view-roadmap" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white">4-Week Adaptive Modular Curriculum</h2>
+          <p class="text-xs text-slate-500">Check items off as you progress. The AI agent monitors your completions in real-time.</p>
+        </div>
+        <button onclick="resetRoadmapProgress()" class="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">Reset Progress</button>
+      </div>
+
+      <div id="roadmapModulesContainer" class="space-y-4">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- TAB 3: NOTES HUB -->
+    <div id="view-notes" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white">My Study Notes & Snippets</h2>
+          <p class="text-xs text-slate-500">Record insights, key code snippets, or thoughts for your learning modules.</p>
+        </div>
+        <button onclick="saveNewNote()" class="px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-500 shadow-md">Add New Note</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="notesGridContainer">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- TAB 4: QUIZ HUB -->
+    <div id="view-quiz" class="hidden space-y-6 max-w-2xl mx-auto">
+      <div class="text-center">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Knowledge Check Quiz</h2>
+        <p class="text-xs text-slate-500">Test your mastery of AI engineering & agentic workflows.</p>
+      </div>
+
+      <div id="quizCard" class="bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+        <div class="flex justify-between items-center text-xs text-slate-500 pb-3 border-b border-slate-200 dark:border-slate-800">
+          <span id="quizQuestionCounter">Question 1 of 3</span>
+          <span id="quizScoreTracker">Score: 0</span>
+        </div>
+        
+        <h3 id="quizQuestionTitle" class="text-sm font-bold text-slate-900 dark:text-white">What is the primary purpose of a Vector Database in a RAG pipeline?</h3>
+        
+        <div id="quizOptionsList" class="space-y-2.5 pt-2">
+          <!-- Options injected via JS -->
+        </div>
+
+        <button id="quizNextBtn" onclick="nextQuizQuestion()" class="hidden w-full py-2.5 mt-4 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-500 transition">Next Question</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FLOATING ADAPTIVE AI AGENT CHAT BUTTON & WINDOW -->
+  <div class="fixed bottom-6 right-6 z-50">
+    <!-- Chat Toggle Button -->
+    <button id="chatToggleBtn" onclick="toggleChatWindow()" class="w-14 h-14 rounded-full bg-gradient-to-tr from-brand-600 to-accent-600 text-white flex items-center justify-center shadow-2xl hover:scale-105 transition">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+    </button>
+
+    <!-- Chat Modal Window -->
+    <div id="chatWindow" class="hidden absolute bottom-20 right-0 w-[360px] sm:w-[400px] h-[500px] bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+      <!-- Chat Header -->
+      <div class="p-4 bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+          <div>
+            <h3 class="text-xs font-bold text-slate-900 dark:text-white">EduPath Agent v2.0</h3>
+            <p class="text-[10px] text-slate-500">Adaptive real-time mentor</p>
+          </div>
+        </div>
+        <button onclick="toggleChatWindow()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">✕</button>
+      </div>
+
+      <!-- Messages Area -->
+      <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs">
+        <div class="bg-slate-100 dark:bg-slate-900 p-3 rounded-xl rounded-tl-none text-slate-800 dark:text-slate-200">
+          Hello! I am your EduPath AI Agent. Stuck on any concept or need a hint for quizzes? Tell me, and I'll adjust your roadmap instantly! 🚀
+        </div>
+      </div>
+
+      <!-- Quick Prompt Suggestions -->
+      <div class="px-3 py-2 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800 flex gap-1.5 overflow-x-auto text-[11px]">
+        <button onclick="sendPresetPrompt('I am struggling with vector DBs')" class="whitespace-nowrap px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:border-brand-500">Struggling with Vector DBs</button>
+        <button onclick="sendPresetPrompt('Give me a quiz hint')" class="whitespace-nowrap px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:border-brand-500">Quiz Hint</button>
+      </div>
+
+      <!-- Input Bar -->
+      <div class="p-3 bg-white dark:bg-[#111827] border-t border-slate-200 dark:border-slate-800 flex gap-2">
+        <input type="text" id="chatInput" placeholder="Ask agent anything..." class="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none" onkeypress="if(event.key==='Enter')sendChatMessage()">
+        <button onclick="sendChatMessage()" class="px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-500">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE EDITING MODAL -->
+  <div id="profileModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#111827] w-full max-w-md rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+        <h3 class="font-bold text-sm text-slate-900 dark:text-white">Edit Profile & Study Goals</h3>
+        <button onclick="closeProfileModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+      
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Your Name</label>
+          <input type="text" id="modalName" value="Alex Developer" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Role</label>
+          <input type="text" id="modalTarget" value="Full-Stack AI Engineer" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Daily Study Goal (Minutes)</label>
+          <input type="number" id="modalGoalMinutes" value="45" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100">
+        </div>
+      </div>
+
+      <button onclick="saveProfileChanges()" class="w-full py-2.5 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-500">Save Changes</button>
+    </div>
   </div>
 
   <script>
-    const $ = (selector) => document.querySelector(selector);
+    // App State & Local Storage Initialization
+    let appState = {
+      user: { name: "Alex Developer", target: "Full-Stack AI Engineer", streak: 5, goalMins: 45 },
+      roadmap: [
+        { week: 1, title: "Week 1: Foundations & Vector Stores", desc: "Embeddings, cosine similarity, and setting up ChromaDB.", completed: true },
+        { week: 2, title: "Week 2: RAG Pipeline Architecture", desc: "Connecting document loaders, text splitters, and retrievers.", completed: false },
+        { week: 3, title: "Week 3: LangChain & Agentic Tooling", desc: "Building custom tool execution loops and function calling.", completed: false },
+        { week: 4, title: "Week 4: FastAPI Deployment & MLOps", desc: "Deploying agent workflows behind production endpoints.", completed: false }
+      ],
+      notes: [
+        { id: 1, title: "Vector Embeddings Note", content: "Embeddings convert text into high-dimensional numerical vectors capturing semantic meaning." },
+        { id: 2, title: "RAG Retrieval Tips", content: "Always chunk documents into 500-token sizes with 50-token overlaps for optimal retrieval precision." }
+      ],
+      quizIndex: 0,
+      quizScore: 0
+    };
 
-    let roadmapItems = [
+    const quizQuestions = [
       {
-        week: "Week 1",
-        title: "Modern JavaScript foundations",
-        description: "Build confidence with asynchronous JavaScript and production-quality patterns.",
-        tasks: [
-          { text: "Review promises, async/await, and error handling", resource: "MDN · Async JavaScript", type: "docs", done: false },
-          { text: "Build a searchable API-powered dashboard", resource: "Project · API dashboard", type: "project", done: false },
-          { text: "Practice 10 JavaScript array and object challenges", resource: "Practice · Code challenges", type: "practice", done: false }
-        ]
+        q: "What is the primary purpose of a Vector Database in a RAG pipeline?",
+        options: ["Store relational user table data", "Perform fast similarity search on text embeddings", "Compile Python code", "Host Docker containers"],
+        correct: 1
       },
       {
-        week: "Week 2",
-        title: "React architecture & state",
-        description: "Create maintainable interfaces with reusable components and predictable state.",
-        tasks: [
-          { text: "Learn hooks, effects, and component composition", resource: "React · Official docs", type: "docs", done: false },
-          { text: "Refactor your dashboard into reusable components", resource: "Project · Component library", type: "project", done: false },
-          { text: "Add loading, empty, and error states", resource: "Practice · UX states", type: "practice", done: false }
-        ]
+        q: "Which library is widely used for chaining LLM agent workflows?",
+        options: ["jQuery", "LangChain / LlamaIndex", "Bootstrap", "Lodash"],
+        correct: 1
       },
       {
-        week: "Week 3",
-        title: "Performance & system thinking",
-        description: "Understand how frontend decisions affect speed, scale, and user experience.",
-        tasks: [
-          { text: "Measure and improve Core Web Vitals", resource: "Web.dev · Performance", type: "video", done: false },
-          { text: "Add caching and pagination to your project", resource: "Project · Performance sprint", type: "project", done: false },
-          { text: "Write a short frontend architecture decision record", resource: "Practice · Architecture notes", type: "docs", done: false }
-        ]
-      },
-      {
-        week: "Week 4",
-        title: "Portfolio project & interview readiness",
-        description: "Ship a polished project and communicate your technical decisions clearly.",
-        tasks: [
-          { text: "Deploy your project with a production README", resource: "Project · Portfolio launch", type: "project", done: false },
-          { text: "Prepare a 5-minute technical walkthrough", resource: "Practice · Storytelling", type: "practice", done: false },
-          { text: "Complete a frontend system design mock interview", resource: "Video · Mock interview", type: "video", done: false }
-        ]
+        q: "What does RAG stand for in AI architecture?",
+        options: ["Random Access Graph", "Retrieval-Augmented Generation", "Recursive Agent Gateway", "Rapid Application Grid"],
+        correct: 1
       }
     ];
 
-    const fileInput = $("#resumeFile");
-    const dropZone = $("#dropZone");
-    const fileName = $("#fileName");
-
-    function setFile(file) {
-      if (!file) return;
-      if (file.type !== "application/pdf" && file.type !== "text/plain") {
-        fileName.textContent = "Please choose a PDF or TXT file.";
-        fileName.className = "mt-1 text-xs text-red-500";
-        return;
-      }
-      fileName.textContent = `${file.name} selected`;
-      fileName.className = "mt-1 text-xs font-semibold text-emerald-600";
+    function initApp() {
+      loadFromStorage();
+      renderRoadmap();
+      renderNotes();
+      renderQuiz();
+      updateProfileDisplay();
     }
 
-    fileInput.addEventListener("change", (event) => setFile(event.target.files[0]));
+    function loadFromStorage() {
+      const saved = localStorage.getItem('edupath_state_v2');
+      if (saved) {
+        try { appState = JSON.parse(saved); } catch (e) { console.error(e); }
+      }
+    }
 
-    ["dragenter", "dragover"].forEach((eventName) => {
-      dropZone.addEventListener(eventName, (event) => {
-        event.preventDefault();
-        dropZone.classList.add("border-violet-500", "bg-violet-50");
+    function saveToStorage() {
+      localStorage.setItem('edupath_state_v2', JSON.stringify(appState));
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = "p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl border border-slate-700 animate-fade-in";
+      el.innerText = msg;
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    function switchTab(tabId) {
+      ['dashboard', 'roadmap', 'notes', 'quiz'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.add('hidden');
+        const navBtn = document.getElementById(`nav-${t}`);
+        if(navBtn) {
+          navBtn.className = "px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+        }
       });
-    });
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if(activeNav) {
+        activeNav.className = "px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition";
+      }
+    }
 
-    ["dragleave", "drop"].forEach((eventName) => {
-      dropZone.addEventListener(eventName, (event) => {
-        event.preventDefault();
-        dropZone.classList.remove("border-violet-500", "bg-violet-50");
+    // Generator & Ingestion
+    function handleGeneratePath(e) {
+      e.preventDefault();
+      const target = document.getElementById('inputTargetRole').value;
+      appState.user.target = target;
+      saveToStorage();
+      showToast("Skill gap analysis updated successfully!");
+      switchTab('roadmap');
+    }
+
+    function loadSampleProfile() {
+      document.getElementById('inputSkills').value = "JavaScript, React, Tailwind, Git";
+      document.getElementById('inputCurrentRole').value = "Junior Frontend Dev";
+      document.getElementById('inputTargetRole').value = "Full-Stack AI Engineer";
+      showToast("Sample profile loaded!");
+    }
+
+    // Roadmap Rendering & Interactivity
+    function renderRoadmap() {
+      const container = document.getElementById('roadmapModulesContainer');
+      container.innerHTML = appState.roadmap.map((m, idx) => `
+        <div class="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm flex items-start gap-4">
+          <input type="checkbox" ${m.completed ? 'checked' : ''} onchange="toggleModuleComplete(${idx})" class="mt-1.5 w-4 h-4 rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
+          <div class="flex-1">
+            <h4 class="font-bold text-sm text-slate-900 dark:text-white ${m.completed ? 'line-through opacity-60' : ''}">${m.title}</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${m.desc}</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${m.completed ? 'bg-emerald-500/10 text-emerald-500' : 'bg-brand-500/10 text-brand-500'}">
+            ${m.completed ? 'Completed' : 'In Progress'}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    function toggleModuleComplete(idx) {
+      appState.roadmap[idx].completed = !appState.roadmap[idx].completed;
+      saveToStorage();
+      renderRoadmap();
+      showToast("Roadmap updated!");
+    }
+
+    function resetRoadmapProgress() {
+      appState.roadmap.forEach(m => m.completed = false);
+      saveToStorage();
+      renderRoadmap();
+      showToast("Roadmap progress reset.");
+    }
+
+    // Notes Hub
+    function renderNotes() {
+      const grid = document.getElementById('notesGridContainer');
+      grid.innerHTML = appState.notes.map(n => `
+        <div class="p-4 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-3">
+          <div>
+            <h4 class="font-bold text-xs text-slate-900 dark:text-white">${n.title}</h4>
+            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">${n.content}</p>
+          </div>
+          <button onclick="deleteNote(${n.id})" class="text-[10px] text-rose-500 font-semibold self-end hover:underline">Delete Note</button>
+        </div>
+      `).join('');
+    }
+
+    function saveNewNote() {
+      const title = prompt("Enter note title:");
+      if (!title) return;
+      const content = prompt("Enter note content / code snippet summary:");
+      if (!content) return;
+
+      appState.notes.push({ id: Date.now(), title, content });
+      saveToStorage();
+      renderNotes();
+      showToast("Note added successfully!");
+    }
+
+    function deleteNote(id) {
+      appState.notes = appState.notes.filter(n => n.id !== id);
+      saveToStorage();
+      renderNotes();
+      showToast("Note deleted.");
+    }
+
+    // Quizzes Hub
+    function renderQuiz() {
+      const q = quizQuestions[appState.quizIndex];
+      document.getElementById('quizQuestionCounter').innerText = `Question ${appState.quizIndex + 1} of ${quizQuestions.length}`;
+      document.getElementById('quizScoreTracker').innerText = `Score: ${appState.quizScore}`;
+      document.getElementById('quizQuestionTitle').innerText = q.q;
+      
+      const optsContainer = document.getElementById('quizOptionsList');
+      optsContainer.innerHTML = q.options.map((opt, idx) => `
+        <button onclick="selectQuizOption(${idx})" class="w-full text-left p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200 hover:border-brand-500 transition">
+          ${opt}
+        </button>
+      `).join('');
+      document.getElementById('quizNextBtn').classList.add('hidden');
+    }
+
+    function selectQuizOption(idx) {
+      const q = quizQuestions[appState.quizIndex];
+      const buttons = document.querySelectorAll('#quizOptionsList button');
+      
+      buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === q.correct) btn.classList.add('bg-emerald-500/20', 'border-emerald-500', 'text-emerald-500');
+        else if (i === idx) btn.classList.add('bg-rose-500/20', 'border-rose-500', 'text-rose-500');
       });
-    });
 
-    dropZone.addEventListener("drop", (event) => setFile(event.dataTransfer.files[0]));
+      if (idx === q.correct) {
+        appState.quizScore += 10;
+        showToast("Correct! +10 Points");
+      } else {
+        showToast("Incorrect. Check the correct answer highlighted.");
+      }
+      document.getElementById('quizNextBtn').classList.remove('hidden');
+    }
 
-    // Theme
-    const savedTheme = localStorage.getItem("edupath-theme");
-    if (savedTheme === "dark") document.documentElement.classList.add("dark");
+    function nextQuizQuestion() {
+      appState.quizIndex++;
+      if (appState.quizIndex >= quizQuestions.length) {
+        appState.quizIndex = 0;
+        showToast(`Quiz completed! Final Score: ${appState.quizScore}`);
+      }
+      renderQuiz();
+    }
 
-    $("#themeBtn").addEventListener("click", () => {
-      document.documentElement.classList.toggle("dark");
-      localStorage.setItem(
-        "edupath-theme",
-        document.documentElement.classList.contains("dark") ? "dark" : "light"
-      );
-    });
+    // Profile & Reminders
+    function openProfileModal() {
+      document.getElementById('modalName').value = appState.user.name;
+      document.getElementById('modalTarget').value = appState.user.target;
+      document.getElementById('modalGoalMinutes').value = appState.user.goalMins;
+      document.getElementById('profileModal').classList.remove('hidden');
+    }
 
-    // Generate path
-    $("#profileForm").addEventListener("submit", (event) => {
-      event.preventDefault();
+    function closeProfileModal() {
+      document.getElementById('profileModal').classList.add('hidden');
+    }
 
-      const button = $("#generateBtn");
-      const originalText = $("#generateText").textContent;
-      button.disabled = true;
-      $("#generateIcon").innerHTML = `<span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>`;
-      $("#generateText").textContent = "Analyzing your profile...";
+    function saveProfileChanges() {
+      appState.user.name = document.getElementById('modalName').value;
+      appState.user.target = document.getElementById('modalTarget').value;
+      appState.user.goalMins = parseInt(document.getElementById('modalGoalMinutes').value) || 45;
+      saveToStorage();
+      updateProfileDisplay();
+      closeProfileModal();
+      showToast("Profile updated successfully!");
+    }
+
+    function updateProfileDisplay() {
+      document.getElementById('headerStreakCount').innerText = appState.user.streak;
+      document.getElementById('statStreakDays').innerText = appState.user.streak;
+      document.getElementById('statStudyGoal').innerText = appState.user.goalMins + "m";
+      document.getElementById('headerAvatar').innerText = appState.user.name.charAt(0).toUpperCase();
+    }
+
+    function toggleReminders(el) {
+      showToast(el.checked ? "Daily study reminders enabled!" : "Reminders muted.");
+    }
+
+    // AI Chatbot Agent
+    function toggleChatWindow() {
+      document.getElementById('chatWindow').classList.toggle('hidden');
+    }
+
+    function sendPresetPrompt(text) {
+      document.getElementById('chatInput').value = text;
+      sendChatMessage();
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const val = input.value.trim();
+      if (!val) return;
+
+      const container = document.getElementById('chatMessages');
+      container.innerHTML += `<div class="bg-brand-600 text-white p-3 rounded-xl rounded-tr-none ml-auto max-w-[85%]">${val}</div>`;
+      input.value = '';
+      container.scrollTop = container.scrollHeight;
 
       setTimeout(() => {
-        const role = $("#role").value.trim() || "your target role";
-        const goal = $("#goal").value.trim();
-
-        $("#resultTitle").textContent = `Your path to becoming a ${role}`;
-        $("#resultSubtitle").textContent = goal
-          ? `A focused 4-week plan designed around your goal: “${goal}”.`
-          : "A focused 4-week plan designed around your goals.";
-
-        renderSkills();
-        renderRoadmap();
-        initializeChat();
-
-        $("#results").classList.remove("hidden");
-        $("#results").classList.add("animate-in");
-        $("#results").scrollIntoView({ behavior: "smooth", block: "start" });
-
-        button.disabled = false;
-        $("#generateIcon").textContent = "✦";
-        $("#generateText").textContent = originalText;
-      }, 1500);
-    });
-
-    function renderSkills() {
-      const skills = $("#skills").value.toLowerCase();
-
-      const strengths = [
-        skills.includes("javascript") ? "JavaScript fundamentals" : "Foundational technical experience",
-        skills.includes("css") || skills.includes("html") ? "Web development foundations" : "Problem-solving mindset",
-        "Ability to learn independently"
-      ];
-
-      const gaps = [
-        "Async JavaScript & error handling",
-        "React architecture and state",
-        "Performance and system design"
-      ];
-
-      $("#strengths").innerHTML = strengths.map((skill) => `
-        <div class="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
-          <span>✓</span>${skill}
-        </div>
-      `).join("");
-
-      $("#gaps").innerHTML = gaps.map((skill, index) => `
-        <div class="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-sm font-semibold text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-          <span>${index === 0 ? "↑" : "!"}</span>${skill}
-        </div>
-      `).join("");
+        let reply = "I've analyzed your prompt and added a tailored 20-minute remedial practice exercise to your roadmap!";
+        if (val.toLowerCase().includes('hint')) {
+          reply = "Hint: Focus on the storage layer that indexes embeddings using multi-dimensional distance metrics!";
+        } else if (val.toLowerCase().includes('vector')) {
+          reply = "No worries! Vector DBs like Pinecone allow similarity queries. I added a quick summary card to your Notes Hub.";
+        }
+        container.innerHTML += `<div class="bg-slate-100 dark:bg-slate-900 p-3 rounded-xl rounded-tl-none mr-auto max-w-[85%] text-slate-800 dark:text-slate-200">${reply}</div>`;
+        container.scrollTop = container.scrollHeight;
+      }, 1000);
     }
 
-    function resourceIcon(type) {
-      return {
-        docs: "📘",
-        project: "🛠️",
-        practice: "⚡",
-        video: "▶️"
-      }[type] || "•";
-    }
-
-    function renderRoadmap() {
-      const roadmap = $("#roadmap");
-      roadmap.innerHTML = roadmapItems.map((week, weekIndex) => {
-        const doneCount = week.tasks.filter(task => task.done).length;
-        const progress = Math.round((doneCount / week.tasks.length) * 100);
-
-        return `
-          <div class="rounded-2xl border border-slate-200 bg-white/60 p-4 dark:border-slate-700 dark:bg-slate-900/45">
-            <div class="mb-4 flex items-start gap-3">
-              <div class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-violet-100 text-xs font-black text-violet-700 dark:bg-violet-950/60 dark:text-violet-300">${weekIndex + 1}</div>
-              <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-violet-600">${week.week}</span>
-                    <h4 class="font-black">${week.title}</h4>
-                  </div>
-                  <span class="text-xs font-bold text-slate-400">${progress}%</span>
-                </div>
-                <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">${week.description}</p>
-                <div class="mt-3 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700">
-                  <div class="h-1.5 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 transition-all" style="width:${progress}%"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              ${week.tasks.map((task, taskIndex) => `
-                <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-transparent p-2 transition hover:border-slate-200 hover:bg-white dark:hover:border-slate-700 dark:hover:bg-slate-800/60">
-                  <input type="checkbox" data-week="${weekIndex}" data-task="${taskIndex}" class="taskCheck mt-1 h-4 w-4 rounded border-slate-300 accent-violet-600" ${task.done ? "checked" : ""}>
-                  <span class="min-w-0 flex-1">
-                    <span class="block text-sm font-semibold ${task.done ? "text-slate-400 line-through" : ""}">${task.text}</span>
-                    <span class="mt-1 block text-xs text-slate-400">${resourceIcon(task.type)} ${task.resource}</span>
-                  </span>
-                </label>
-              `).join("")}
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      document.querySelectorAll(".taskCheck").forEach((checkbox) => {
-        checkbox.addEventListener("change", (event) => {
-          const weekIndex = Number(event.target.dataset.week);
-          const taskIndex = Number(event.target.dataset.task);
-          roadmapItems[weekIndex].tasks[taskIndex].done = event.target.checked;
-          renderRoadmap();
-
-          const total = roadmapItems.flatMap(week => week.tasks).length;
-          const complete = roadmapItems.flatMap(week => week.tasks).filter(task => task.done).length;
-          $("#completionBadge").textContent = `${Math.round((complete / total) * 100)}% complete`;
-        });
-      });
-    }
-
-    // Chat
-    function initializeChat() {
-      $("#chatMessages").innerHTML = "";
-      addMessage("agent", "Hi! I’m your EduPath Agent. I’ve mapped a four-week path based on your profile. Tell me how your learning is going, and I’ll adapt the plan with you.");
-      addMessage("agent", "A good first move is to complete the async JavaScript task in Week 1. You can check tasks off as you go.");
-    }
-
-    function addMessage(sender, text, typing = false) {
-      const wrapper = document.createElement("div");
-      wrapper.className = `flex ${sender === "user" ? "justify-end" : "justify-start"} animate-in`;
-
-      if (typing) {
-        wrapper.innerHTML = `
-          <div class="flex max-w-[85%] items-center gap-1 rounded-2xl rounded-bl-md bg-slate-100 px-4 py-3 dark:bg-slate-800">
-            <span class="typing-dot h-1.5 w-1.5 rounded-full bg-slate-500"></span>
-            <span class="typing-dot h-1.5 w-1.5 rounded-full bg-slate-500"></span>
-            <span class="typing-dot h-1.5 w-1.5 rounded-full bg-slate-500"></span>
-          </div>
-        `;
-      } else {
-        wrapper.innerHTML =600 text-white"
-            : "rounded-bl-md bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200"} px-4 py-3 text-sm leading-6">
-            ${text}
-          </div>
-        `;
-      }
-
-      $("#chatMessages").appendChild(wrapper);
-      $("#chatMessages").scrollTop = $("#chatMessages").scrollHeight;
-      return wrapper;
-    }
-
-    function createAgentResponse(message) {
-      const lower = message.toLowerCase();
-
-      if (lower.includes("async") || lower.includes("promise") || lower.includes("struggl")) {
-        roadmapItems[0].tasks[0].done = false;
-        return "Async JavaScript is a common sticking point. I’ve kept1.";
-      }
-
-      if (lower.includes("finished") || lower.includes("complete") || lower.includes("done")) {
-        roadmapItems[0].tasks[0].done = true;
-        return "That’s great progress. I marked the first Week 1 task complete and your next priority is the API-powered dashboard. Keep it small: search input, loading state, results list, and an error state. Ship a basic version before polishing it.";
-      }
-
-      if (lower.includes("slow") || lower.includes("busy") || lower.includes("time")) {
-        roadmapItems[1].description = "Reduced scope: focus on reusable components and one state-management for a focused concept review, then immediately apply it in the API.round((complete / total) * 100)}% complete`;
-      }, 850);
-    }
-
-    function escapeHtml(value) {
-      return value.replace(/[&<>"']/g, (char) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-      }[char]));
-    }
-
-    $("#chatForm").addEventListener("submit", (event) => {
-      event.preventDefault();
-      sendChat($("#chatInput").value);
-    });
-
-    document.querySelectorAll(".promptBtn").forEach((button) => {
-      button.addEventListener("click", () => sendChat(button.dataset.prompt));
-    });
-
-    $("#resetBtn").addEventListener("click", () => {
-      $("#results").classList.add("hidden");
-      $("#setup").scrollIntoView({ behavior: "smooth" });
-      roadmapItems.forEach(week => week.tasks.forEach(task => task.done = false));
-      $("#profileForm").reset();
-      fileName.textContent = "PDF up to 10 MB, or paste your resume text below";
-      fileName.className = "mt-1 text-xs text-slate-500 dark:text-slate-400";
-    });
+    window.onload = initApp;
   </script>
 </body>
 </html>
