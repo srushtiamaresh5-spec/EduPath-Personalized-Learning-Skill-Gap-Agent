@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EduPath | Personalized Learning Agent</title>
+  <title>EduPath — Personalized Learning Agent</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-
   <script>
     tailwind.config = {
       darkMode: "class",
       theme: {
         extend: {
           colors: {
-            brand: "#6D5DFB"
+            ink: "#111827",
+            brand: "#7c3aed",
+            cyanx: "#06b6d4"
+                     soft: "0 20px 60px rgba(15, 23, 42, .12)"
           }
         }
       }
@@ -21,42 +23,60 @@
   </script>
 
   <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       background:
-        radial-gradient(circle at top left, rgba(109, 93, 251, 0.14), transparent 35%),
-        radial-gradient(circle at top right, rgba(34, 211, 238, 0.12), transparent 30%),
+        radial-gradient(circle at top left, rgba(124, 58, 237, .12), transparent 28rem),
+        radial-gradient(circle at 85% 10%, rgba(6, 182, 212, .1), transparent 25rem),
         #f8fafc;
     }
 
     .dark body {
       background:
-        radial-gradient(circle at top left, rgba(109, 93, 251, 0.2), transparent 35%),
-        radial-gradient(circle at top right, rgba(34, 211, 238, 0.12), transparent 30%),
-        #0f172a;
+        radial-gradient(circle at top left, rgba(124, 58, 237, .18), transparent 28rem),
+        radial-gradient(circle at 85% 10%, rgba(6, 182, 212, .12), transparent 25rem),
+        #080d1a;
     }
 
     .glass {
-      background: rgba(255, 255, 255, 0.82);
-      backdrop-filter: blur(18px);
-      border: 1px solid rgba(226, 232, 240, 0.8);
+      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, .76);
+      border: 1px solid rgba(226, 232, 240, .9);
     }
 
     .dark .glass {
-      background: rgba(15, 23, 42, 0.8);
-      border-color: rgba(71, 85, 105, 0.6);
+      background: rgba(15, 23, 42, .72);
+      border-color: rgba(51, 65, 85, .8);
     }
 
-    .gradient-text {
-      background: linear-gradient(90deg, #6d5dfb, #06b6d4);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .mesh {
+      background-image:
+        linear-gradient(rgba(148, 163, 184, .08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, .08) 1px, transparent 1px);
+      background-size: 28px 28px;
     }
 
-    .fade-in {
-      animation: fadeIn 0.4s ease both;
+    .chat-scroll::-webkit-scrollbar {
+      width: 5px;
     }
 
-    @keyframes fadeIn {
+    .chat-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 999px;
+    }
+
+    .dark .chat-scroll::-webkit-scrollbar-thumb {
+      background: #475569;
+    }
+
+    .animate-in {
+      animation: rise .45s ease both;
+    }
+
+    @keyframes rise {
       from {
         opacity: 0;
         transform: translateY(12px);
@@ -68,714 +88,483 @@
       }
     }
 
-    .chat-box {
-      max-height: 420px;
-      overflow-y: auto;
+    .typing-dot {
+      animation: blink 1.2s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: .15s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: .3s;
+    }
+
+    @keyframes blink {
+      0%, 80%, 100% { opacity: .25; transform: translateY(0); }
+      40% { opacity: 1; transform: translateY(-3px); }
     }
   </style>
 </head>
 
-<body class="min-h-screen text-slate-900 dark:text-white transition-colors">
-
-  <!-- Header -->
-  <header class="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
-    <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand to-cyan-400 text-white flex items-center justify-center text-xl font-black">
-          E
-        </div>
-
-        <div>
-          <h1 class="font-black text-lg">EduPath</h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400">
-            Personalized learning agent
-          </p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-4">
-        <span class="hidden sm:flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          Agent online
-        </span>
-
-        <button
-          id="themeButton"
-          class="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
-          title="Toggle theme"
-        >
-          🌙
-        </button>
-
-        <div class="w-10 h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center text-xs font-bold">
-          SA
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main class="max-w-7xl mx-auto px-5 py-10">
-
-    <!-- Hero -->
-    <section class="mb-8">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 text-brand text-xs font-bold mb-4">
-        <span class="w-2 h-2 rounded-full bg-brand"></span>
-        AI-powered career navigation
-      </div>
-
-      <h2 class="text-4xl md:text-5xl font-black max-w-3xl leading-tight">
-        Turn your ambition into a
-        <span class="gradient-text">clear learning path.</span>
-      </h2>
-
-      <p class="max-w-2xl mt-4 text-slate-600 dark:text-slate-400 leading-7">
-        Tell EduPath where you are and where you want to go. Your adaptive agent
-        will identify skill gaps and create a practical learning roadmap.
-      </p>
-    </section>
-
-    <!-- Input Card -->
-    <section class="glass rounded-3xl shadow-xl p-6 mb-8">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
-        <div>
-          <h3 class="text-xl font-bold">Build your learning profile</h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Add your experience, target role, and career goal.
-          </p>
-        </div>
-
-        <span class="text-xs text-slate-500 dark:text-slate-400">
-          Step 1 of 2
-        </span>
-      </div>
-
-      <div class="grid lg:grid-cols-3 gap-5">
-
-        <!-- Skills -->
-        <div>
-          <label class="text-sm font-bold">Current skills and experience</label>
-
-          <textarea
-            id="skills"
-            rows="7"
-            class="w-full mt-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm resize-none"
-            placeholder="Example: HTML, CSS, JavaScript basics, Git, responsive design..."
-          ></textarea>
-        </div>
-
-        <!-- Role and goal -->
-        <div>
-          <label class="text-sm font-bold">Target role</label>
-
-          <input
-            id="role"
-            class="w-full mt-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm"
-            placeholder="Example: Frontend Engineer"
-          />
-
-          <label class="block text-sm font-bold mt-5">Career goal</label>
-
-          <textarea
-            id="goal"
-            rows="5"
-            class="w-full mt-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm resize-none"
-            placeholder="Example: Get hired at a product company within six months."
-          ></textarea>
-        </div>
-
-        <!-- Resume -->
-        <div>
-          <label class="text-sm font-bold">Resume or portfolio</label>
-
-          <div
-            id="uploadArea"
-            class="mt-2 min-h-[180px] rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 flex flex-col items-center justify-center text-center p-5 cursor-pointer hover:border-brand transition"
-          >
-            <input id="resumeFile" type="file" accept=".pdf,.txt,.md" class="hidden" />
-
-            <div class="text-4xl mb-3">📄</div>
-
-            <p class="font-bold text-sm">Upload your resume</p>
-
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              PDF, TXT, or Markdown
-            </p>
-
-            <p id="fileName" class="hidden text-xs text-brand font-bold mt-3"></p>
+<body class="min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
+  <div class="min-h-screen">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 border-b border-slate-200/70 bg-white/75 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/75">
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
+        <a href="#" class="flex items-center gap-3">
+          <div class="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-violet-600 to-cyan-500 text-xl font-black text-white shadow-lg shadow-violet-500/20">
+            E
           </div>
+          <div>
+            <div class="font-black tracking-tight">EduPath</div>
+            <div class="text-[10px] font-semibold uppercase tracking-[.22em] text-slate-400">Learning agent</div>
+          </div>
+        </a>
 
-          <textarea
-            id="resumeText"
-            rows="3"
-            class="w-full mt-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm resize-none"
-            placeholder="Or paste resume text here..."
-          ></textarea>
-        </div>
-      </div>
-
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6">
-        <div class="flex flex-wrap gap-2">
-          <button
-            class="example px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold"
-            data-type="frontend"
-          >
-            Frontend example
-          </button>
-
-          <button
-            class="example px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold"
-            data-type="data"
-          >
-            Data example
-          </button>
-
-          <button
-            class="example px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold"
-            data-type="product"
-          >
-            Product example
+        <div class="flex items-center gap-3">
+          <span class="hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 sm:inline-flex dark:border-emerald-900/70 dark:bg-emerald-950/40 dark:text-emerald-300">
+            <span class="mr-2 mt-0.5 h-2 w-2 rounded-full bg-emerald-500"></span>
+            Agent online
+          </span>
+          <button id="themeBtn" class="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-600 transition hover:border-violet-300 hover:text-violet-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" aria-label="Toggle theme">
+            <svg id="sunIcon" class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.36-6.36-.7.7M6.34 17.66l-.7.7m12.02 0-.7-.7M6.34 6.34l-.7-.7M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/>
+            </svg>
+            <svg id="moonIcon" class="h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.6 6.6 0 0 0 21 12.8Z"/>
+            </svg>
           </button>
         </div>
-
-        <button
-          id="generateButton"
-          class="px-6 py-3 rounded-2xl bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-bold text-sm hover:scale-[1.02] transition"
-        >
-          <span id="generateText">Generate learning path</span>
-          <span id="spinner" class="hidden"> ⟳</span>
-        </button>
       </div>
-    </section>
+    </header>
 
-    <!-- Empty state -->
-    <section id="emptyState" class="text-center py-10">
-      <div class="text-6xl mb-4">🧭</div>
-
-      <h3 class="text-2xl font-black">
-        Your personalized path starts here
-      </h3>
-
-      <p class="max-w-xl mx-auto mt-3 text-slate-500 dark:text-slate-400">
-        Complete your profile above and EduPath will create a customized
-        skill-gap analysis, roadmap, and adaptive learning plan.
-      </p>
-    </section>
-
-    <!-- Results -->
-    <section id="results" class="hidden fade-in">
-
-      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+    <main class="mx-auto max-w-7xl px-5 py-10 lg:px-8 lg:py-14">
+      <!-- Hero -->
+      <section class="mb-10 grid items-center gap-8 lg:grid-cols-[1.15fr_.85fr]">
         <div>
-          <p class="text-xs uppercase tracking-widest text-brand font-black">
-            Personalized analysis
-          </p>
-
-          <h2 class="text-3xl font-black mt-2">
-            Your path to
-            <span id="resultRole" class="gradient-text">Frontend Engineer</span>
-          </h2>
-
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Updated by EduPath Agent just now.
-          </p>
-        </div>
-
-        <button
-          id="resetButton"
-          class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-bold"
-        >
-          Start over
-        </button>
-      </div>
-
-      <div class="grid xl:grid-cols-12 gap-6">
-
-        <!-- Left column -->
-        <div class="xl:col-span-7 space-y-6">
-
-          <!-- Stats -->
-          <div class="grid sm:grid-cols-3 gap-4">
-            <div class="glass rounded-2xl p-5 shadow-lg">
-              <p class="text-xs text-slate-500 dark:text-slate-400">
-                Readiness score
-              </p>
-
-              <div class="text-3xl font-black mt-2">62%</div>
-
-              <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-3">
-                <div class="h-full w-[62%] rounded-full bg-gradient-to-r from-brand to-cyan-400"></div>
-              </div>
-            </div>
-
-            <div class="glass rounded-2xl p-5 shadow-lg">
-              <p class="text-xs text-slate-500 dark:text-slate-400">
-                Estimated duration
-              </p>
-
-              <div class="text-3xl font-black mt-2">
-                4<span class="text-base"> weeks</span>
-              </div>
-
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                6–8 hours per week
-              </p>
-            </div>
-
-            <div class="glass rounded-2xl p-5 shadow-lg">
-              <p class="text-xs text-slate-500 dark:text-slate-400">
-                Priority gaps
-              </p>
-
-              <div id="gapCount" class="text-3xl font-black mt-2">4</div>
-
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                Skills to strengthen
-              </p>
-            </div>
+          <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-700 dark:border-violet-900/70 dark:bg-violet-950/40 dark:text-violet-300">
+            <span>✦</span> Your AI-powered career co-pilot
           </div>
 
-          <!-- Skill gaps -->
-          <div class="glass rounded-3xl shadow-lg p-6">
-            <div class="flex items-start justify-between mb-6">
-              <div>
-                <h3 class="text-xl font-black">Skill gap analysis</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Your current capabilities compared with your target role.
-                </p>
-              </div>
+          <h1 class="max-w-3xl text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
+            Turn your ambition into a
+            <span class="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">clear path forward.</span>
+          </h1>
 
-              <div class="text-2xl">📊</div>
-            </div>
+          <p class="mt-5 max-w-2xl text-base leading-7 text-slate-500 dark:text-slate-400 sm:text-lg">
+            EduPath analyzes your experience, identifies high-impact skill gaps, and adapts your weekly learning plan as you progress.
+          </p>
 
-            <div id="skillsList" class="space-y-5"></div>
-          </div>
-
-          <!-- Roadmap -->
-          <div class="glass rounded-3xl shadow-lg p-6">
-            <div class="flex items-start justify-between mb-6">
-              <div>
-                <h3 class="text-xl font-black">Structured weekly roadmap</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Complete tasks and track your progress.
-                </p>
-              </div>
-
-              <span class="px-3 py-1 rounded-full bg-cyan-100 dark:bg-cyan-950 text-cyan-700 dark:text-cyan-300 text-xs font-bold">
-                4-week sprint
-              </span>
-            </div>
-
-            <div id="roadmap" class="space-y-7"></div>
+          <div class="mt-7 flex flex-wrap gap-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
+            <span class="flex items-center gap-2"><span class="grid h-6 w-6 place-items-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60">✓</span> Personalized roadmap</span>
+            <span class="flex items-center gap-2"><span class="grid h-6 w-6 place-items-center rounded-full bg-cyan-100 text-cyan-600 dark:bg-cyan-950/60">✓</span> Adaptive coaching</span>
           </div>
         </div>
 
-        <!-- Right column -->
-        <div class="xl:col-span-5 space-y-6">
-
-          <!-- Progress -->
-          <div class="glass rounded-3xl shadow-lg p-6">
-            <div class="flex items-center justify-between">
+        <div class="glass mesh relative overflow-hidden rounded-3xl p-6 shadow-soft">
+          <div class="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-violet-500/15 blur-2xl"></div>
+          <div class="relative">
+            <div class="mb-5 flex items-center justify-between">
               <div>
-                <h3 class="text-xl font-black">Your progress</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Keep building small wins.
-                </p>
+                <div class="text-xs font-bold uppercase tracking-widest text-slate-400">Live learner snapshot</div>
+                <div class="mt-1 font-bold">Frontend Engineer track</div>
               </div>
-
-              <span id="progressPercent" class="text-2xl font-black gradient-text">
-                0%
-              </span>
+              <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">In progress</span>
             </div>
 
-            <div class="w-full h-3 rounded-full bg-slate-100 dark:bg-slate-800 mt-6">
-              <div
-                id="progressBar"
-                class="h-full rounded-full bg-gradient-to-r from-brand to-cyan-400 transition-all"
-                style="width: 0%"
-              ></div>
+            <div class="mb-5 flex items-center gap-4">
+              <div class="relative grid h-20 w-20 place-items-center rounded-full" style="background: conic-gradient(#8b5cf6 0 68%, #e2e8f0 68% 100%)">
+                <div class="grid h-14 w-14 place-items-center rounded-full bg-white text-lg font-black dark:bg-slate-900">68%</div>
+              </div>
+              <div>
+                <div class="font-bold">Strong momentum</div>
+                <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">You are 3 skills away from your target role.</p>
+              </div>
             </div>
 
-            <div class="flex justify-between text-sm mt-4">
-              <span class="text-slate-500 dark:text-slate-400">
-                Tasks completed
-              </span>
-
-              <strong id="taskCount">0 / 0</strong>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between text-xs font-semibold">
+                <span>JavaScript depth</span><span class="text-violet-600">82%</span>
+              </div>
+              <div class="h-2 rounded-full bg-slate-200 dark:bg-slate-700"><div class="h-2 w-[82%] rounded-full bg-violet-500"></div></div>
+              <div class="flex items-center justify-between text-xs font-semibold">
+                <span>System design</span><span class="text-cyan-600">46%</span>
+              </div>
+              <div class="h-2 rounded-full bg-slate-200 dark:bg-slate-700"><div class="h-2 w-[46%] rounded-full bg-cyan-500"></div></div>
             </div>
           </div>
+        </div>
+      </section>
 
-          <!-- Chat -->
-          <div class="glass rounded-3xl shadow-lg overflow-hidden">
-            <div class="p-5 border-b border-slate-200 dark:border-slate-800">
-              <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand to-cyan-400 text-white flex items-center justify-center text-xl">
-                  🤖
+      <!-- Input panel -->
+      <section id="setup" class="glass rounded-3xl p-5 shadow-soft sm:p-8">
+        <div class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <div class="mb-2 text-xs font-bold uppercase tracking-[.2em] text-violet-600">01 / Tell us about you</div>
+            <h2 class="text-2xl font-black tracking-tight sm:text-3xl">Build your learning profile</h2>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">The more context you share, the more focused your path becomes.</p>
+          </div>
+          <div class="hidden items-center gap-2 text-xs font-semibold text-slate-400 sm:flex">
+            <span class="h-2 w-2 rounded-full bg-violet-500"></span> Takes less than 2 minutes
+          </div>
+        </div>
+
+        <form id="profileForm" class="grid gap-5 lg:grid-cols-2">
+          <label class="block">
+            <span class="mb-2 block text-sm font-bold">Current skills & experience</span>
+            <textarea id="skills" required rows="5" class="w-full resize-none rounded-2xl border border-slate-200 bg-white/80 px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900/70" placeholder="e.g. HTML, CSS, JavaScript fundamentals, 1 year building small web apps..."></textarea>
+          </label>
+
+          <div class="space-y-5">
+            <label class="block">
+              <span class="mb-2 block text-sm font-bold">Target role</span>
+              <input id="role" required class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900/70" placeholder="e.g. Senior Frontend Engineer" />
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-sm font-bold">Career goal</span>
+              <input id="goal" required class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900/70" placeholder="e.g. Get job-ready in 3 months" />
+            </label>
+          </div>
+
+          <div class="lg:col-span-2">
+            <span class="mb-2 block text-sm font-bold">Resume <span class="font-normal text-slate-400">(optional)</span></span>
+            <div id="dropZone" class="group rounded-2xl border-2 border-dashed border-slate-200 bg-white/50 p-5 transition hover:border-violet-400 hover:bg-violet-50/40 dark:border-slate-700 dark:bg-slate-900/40 dark:hover:border-violet-500 dark:hover:bg-violet-950/20">
+              <div class="flex flex-col items-center justify-center gap-3 text-center sm:flex-row sm:text-left">
+                <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-violet-100 text-2xl dark:bg-violet-950/60">📄</div>
+                <div class="flex-1">
+                  <div class="font-bold">Drop your resume here or browse</div>
+                  <div id="fileName" class="mt-1 text-xs text-slate-500 dark:text-slate-400">PDF up to 10 MB, or paste your resume text below</div>
                 </div>
+                <label class="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-violet-400 hover:text-violet-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                  Browse files
+                  <input id="resumeFile" type="file" accept=".pdf,.txt" class="hidden" />
+                </label>
+              </div>
+              <textarea id="resumeText" rows="2" class="mt-4 w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-violet-500 dark:border-slate-700 dark:bg-slate-900" placeholder="Or paste a resume summary here..."></textarea>
+            </div>
+          </div>
 
+          <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center lg:col-span-2">
+            <button id="generateBtn" type="submit" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-violet-600/20 transition hover:-translate-y-0.5 hover:shadow-violet-600/30 disabled:cursor-not-allowed disabled:opacity-70">
+              <span id="generateIcon">✦</span>
+              <span id="generateText">Generate my learning path</span>
+            </button>
+            <span class="text-xs text-slate-400">Your profile stays in this browser for this demo.</span>
+          </div>
+        </form>
+      </section>
+
+      <!-- Results -->
+      <section id="results" class="mt-10 hidden space-y-6">
+        <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <div class="mb-2 text-xs font-bold uppercase tracking-[.2em] text-violet-600">02 / Your personalized path</div>
+            <h2 id="resultTitle" class="text-3xl font-black tracking-tight">Your path to becoming a Frontend Engineer</h2>
+            <p id="resultSubtitle" class="mt-2 text-sm text-slate-500 dark:text-slate-400"></p>
+          </div>
+          <button id="resetBtn" class="self-start rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 transition hover:border-violet-400 hover:text-violet-600 dark:border-slate-700 dark:text-slate-300">Start over</button>
+        </div>
+
+        <div class="grid gap-6 xl:grid-cols-[1.05fr_.95fr]">
+          <!-- Gap analysis -->
+          <div class="glass rounded-3xl p-6 shadow-soft">
+            <div class="mb-6 flex items-start justify-between">
+              <div>
+                <h3 class="text-lg font-black">Skill gap analysis</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">What to strengthen for your target role.</p>
+              </div>
+              <div class="grid h-12 w-12 place-items-center rounded-2xl bg-violet-100 text-lg font-black text-violet-700 dark:bg-violet-950/60 dark:text-violet-300">68%</div>
+            </div>
+
+            <div class="mb-7 h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+              <div class="h-full w-[68%] rounded-full bg-gradient-to-r from-violet-500 to-cyan-500"></div>
+            </div>
+
+            <div class="grid gap-6 sm:grid-cols-2">
+              <div>
+                <div class="mb-3 flex items-center gap-2 text-sm font-bold"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span> Current strengths</div>
+                <div id="strengths" class="space-y-2"></div>
+              </div>
+              <div>
+                <div class="mb-3 flex items-center gap-2 text-sm font-bold"><span class="h-2.5 w-2.5 rounded-full bg-amber-500"></span> Priority gaps</div>
+                <div id="gaps" class="space-y-2"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick stats -->
+          <div class="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
+            <div class="glass rounded-3xl p-5 shadow-soft">
+              <div class="mb-3 flex items-center justify-between">
+                <span class="text-sm font-bold text-slate-500 dark:text-slate-400">Estimated effort</span>
+                <span class="text-xl">⏱️</span>
+              </div>
+              <div class="text-2xl font-black">6–8 hrs/week</div>
+              <div class="mt-1 text-xs text-slate-400">Focused, sustainable progress</div>
+            </div>
+            <div class="glass rounded-3xl p-5 shadow-soft">
+              <div class="mb-3 flex items-center justify-between">
+                <span class="text-sm font-bold text-slate-500 dark:text-slate-400">Learning horizon</span>
+                <span class="text-xl">🗓️</span>
+              </div>
+              <div class="text-2xl font-black">4 weeks</div>
+              <div class="mt-1 text-xs text-slate-400">Adaptable to your pace</div>
+            </div>
+            <div class="glass rounded-3xl p-5 shadow-soft">
+              <div class="mb-3 flex items-center justify-between">
+                <span class="text-sm font-bold text-slate-500 dark:text-slate-400">Next milestone</span>
+                <span class="text-xl">🏁</span>
+              </div>
+              <div class="text-2xl font-black">Ship a project</div>
+              <div class="mt-1 text-xs text-slate-400">Prove your skills in public</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Roadmap + Chat -->
+        <div class="grid gap-6 xl:grid-cols-[1.05fr_.95fr]">
+          <div class="glass rounded-3xl p-6 shadow-soft">
+            <div class="mb-6 flex items-center justify-between">
+              <div>
+                <h3 class="text-lg font-black">Adaptive weekly roadmap</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Complete tasks to unlock your next milestone.</p>
+              </div>
+              <span id="completionBadge" class="rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">0% complete</span>
+            </div>
+            <div id="roadmap" class="space-y-4"></div>
+          </div>
+
+          <div class="glass flex min-h-[600px] flex-col overflow-hidden rounded-3xl shadow-soft">
+            <div class="border-b border-slate-200/80 p-5 dark:border-slate-800">
+              <div class="flex items-center gap-3">
+                <div class="relative grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-violet-600 to-cyan-500 text-xl text-white">
+                  ✦
+                  <span class="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900"></span>
+                </div>
                 <div>
                   <h3 class="font-black">EduPath Agent</h3>
-                  <p class="text-xs text-slate-500 dark:text-slate-400">
-                    Ask for help or adapt your plan
-                  </p>
+                  <p class="text-xs text-emerald-600">Adaptive coach · Online now</p>
                 </div>
               </div>
             </div>
 
-            <div id="chatMessages" class="chat-box p-5 space-y-4">
-              <div class="flex gap-3">
-                <div class="w-8 h-8 rounded-xl bg-brand/10 text-brand flex items-center justify-center text-xs font-black">
-                  E
-                </div>
+            <div id="chatMessages" class="chat-scroll flex-1 space-y-4 overflow-y-auto p-5"></div>
 
-                <div class="max-w-[85%] bg-slate-100 dark:bg-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-6">
-                  Your learning plan is ready. Tell me what you completed or where you are struggling, and I will adapt your plan.
-                </div>
+            <div class="border-t border-slate-200/80 p-4 dark:border-slate-800">
+              <div class="mb-3 flex flex-wrap gap-2">
+                <button class="promptBtn rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-violet-100 hover:text-violet-700 dark:bg-slate-800 dark:text-slate-300" data-prompt="I finished week 1. What should I focus on next?">I finished week 1</button>
+                <button class="promptBtn rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-violet-100 hover:text-violet-700 dark:bg-slate-800 dark:text-slate-300" data-prompt="I am struggling with async JavaScript. Can you adjust my plan?">Help with async JS</button>
               </div>
-            </div>
-
-            <div class="px-5 pb-5">
-              <div class="flex flex-wrap gap-2 mb-3">
-                <button class="prompt px-3 py-2 rounded-xl bg-brand/10 text-brand text-xs font-bold">
-                  I finished week 1
-                </button>
-
-                <button class="prompt px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">
-                  I am struggling with async JavaScript
-                </button>
-
-                <button class="prompt px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">
-                  Make it more project-based
-                </button>
-              </div>
-
-              <form id="chatForm" class="flex gap-2">
-                <textarea
-                  id="chatInput"
-                  rows="2"
-                  class="flex-1 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm resize-none"
-                  placeholder="Message your learning agent..."
-                ></textarea>
-
-                <button
-                  class="w-12 h-12 rounded-2xl bg-brand text-white font-black"
-                  type="submit"
-                >
-                  ➤
-                </button>
+              <form id="chatForm" class="flex items-center gap-2">
+                <input id="chatInput" class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm outline-none focus:border-violet-500 dark:border-slate-700 dark:bg-slate-900" placeholder="Ask your agent anything..." autocomplete="off" />
+                <button class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-violet-600 text-white transition hover:bg-violet-700" aria-label="Send message">➤</button>
               </form>
             </div>
           </div>
-
-          <!-- Tip -->
-          <div class="rounded-3xl bg-gradient-to-br from-brand to-indigo-700 text-white p-6 shadow-lg">
-            <h3 class="font-black">Agent tip</h3>
-
-            <p class="text-sm text-white/80 leading-6 mt-2">
-              Learning sticks better when every concept becomes something you can demonstrate.
-              Try to ship one small project every week.
-            </p>
-          </div>
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
 
-  <!-- JavaScript -->
+    <footer class="mx-auto max-w-7xl px-5 pb-8 pt-4 text-center text-xs text-slate-400 lg:px-8">
+      EduPath demo · Built for focused, human-paced learning
+    </footer>
+  </div>
+
   <script>
     const $ = (selector) => document.querySelector(selector);
 
-    const examples = {
-      frontend: {
-        skills: "HTML, CSS, JavaScript basics, Git, responsive design, and experience building landing pages.",
-        role: "Frontend Engineer",
-        goal: "Get hired as a frontend engineer at a product company within six months.",
-        resume: "Built responsive marketing websites and reusable UI components."
+    let roadmapItems = [
+      {
+        week: "Week 1",
+        title: "Modern JavaScript foundations",
+        description: "Build confidence with asynchronous JavaScript and production-quality patterns.",
+        tasks: [
+          { text: "Review promises, async/await, and error handling", resource: "MDN · Async JavaScript", type: "docs", done: false },
+          { text: "Build a searchable API-powered dashboard", resource: "Project · API dashboard", type: "project", done: false },
+          { text: "Practice 10 JavaScript array and object challenges", resource: "Practice · Code challenges", type: "practice", done: false }
+        ]
       },
-
-      data: {
-        skills: "Excel, SQL basics, beginner Python, and experience creating business reports.",
-        role: "Data Analyst",
-        goal: "Become job-ready for an entry-level data analyst role.",
-        resume: "Created dashboards, cleaned spreadsheets, and presented insights."
+      {
+        week: "Week 2",
+        title: "React architecture & state",
+        description: "Create maintainable interfaces with reusable components and predictable state.",
+        tasks: [
+          { text: "Learn hooks, effects, and component composition", resource: "React · Official docs", type: "docs", done: false },
+          { text: "Refactor your dashboard into reusable components", resource: "Project · Component library", type: "project", done: false },
+          { text: "Add loading, empty, and error states", resource: "Practice · UX states", type: "practice", done: false }
+        ]
       },
-
-      product: {
-        skills: "Customer support, user research, Notion, basic analytics, and strong communication.",
-        role: "Associate Product Manager",
-        goal: "Transition into product management by building practical product experience.",
-        resume: "Worked with customers and documented recurring product pain points."
+      {
+        week: "Week 3",
+        title: "Performance & system thinking",
+        description: "Understand how frontend decisions affect speed, scale, and user experience.",
+        tasks: [
+          { text: "Measure and improve Core Web Vitals", resource: "Web.dev · Performance", type: "video", done: false },
+          { text: "Add caching and pagination to your project", resource: "Project · Performance sprint", type: "project", done: false },
+          { text: "Write a short frontend architecture decision record", resource: "Practice · Architecture notes", type: "docs", done: false }
+        ]
+      },
+      {
+        week: "Week 4",
+        title: "Portfolio project & interview readiness",
+        description: "Ship a polished project and communicate your technical decisions clearly.",
+        tasks: [
+          { text: "Deploy your project with a production README", resource: "Project · Portfolio launch", type: "project", done: false },
+          { text: "Prepare a 5-minute technical walkthrough", resource: "Practice · Storytelling", type: "practice", done: false },
+          { text: "Complete a frontend system design mock interview", resource: "Video · Mock interview", type: "video", done: false }
+        ]
       }
-    };
+    ];
 
-    const roadmapData = {
-      frontend: [
-        {
-          week: "Week 1",
-          title: "JavaScript foundations and async thinking",
-          description: "Strengthen the JavaScript concepts needed for modern interfaces.",
-          tasks: [
-            "Review promises, async/await, and error handling",
-            "Build a GitHub user search interface",
-            "Complete five JavaScript coding challenges"
-          ]
-        },
-        {
-          week: "Week 2",
-          title: "React architecture and reusable UI",
-          description: "Move from individual pages to scalable component systems.",
-          tasks: [
-            "Learn components, props, state, and hooks",
-            "Refactor your search interface into React",
-            "Create reusable form components"
-          ]
-        },
-        {
-          week: "Week 3",
-          title: "Testing, performance, and APIs",
-          description: "Build interfaces that are reliable and production-ready.",
-          tasks: [
-            "Add loading, success, and error states",
-            "Learn basic frontend testing",
-            "Improve page performance"
-          ]
-        },
-        {
-          week: "Week 4",
-          title: "Portfolio project and interview readiness",
-          description: "Turn your learning into evidence employers can evaluate.",
-          tasks: [
-            "Ship a polished dashboard project",
-            "Deploy the project online",
-            "Prepare frontend interview examples"
-          ]
-        }
-      ],
+    const fileInput = $("#resumeFile");
+    const dropZone = $("#dropZone");
+    const fileName = $("#fileName");
 
-      data: [
-        {
-          week: "Week 1",
-          title: "SQL foundations",
-          description: "Learn to query, filter, join, and aggregate data.",
-          tasks: [
-            "Practice SELECT, JOIN, GROUP BY, and filtering",
-            "Analyze a public ecommerce dataset",
-            "Write five business questions"
-          ]
-        },
-        {
-          week: "Week 2",
-          title: "Python for data analysis",
-          description: "Use Python to clean and explore datasets.",
-          tasks: [
-            "Learn pandas basics",
-            "Create a Jupyter analysis notebook",
-            "Clean a real-world dataset"
-          ]
-        },
-        {
-          week: "Week 3",
-          title: "Dashboards and storytelling",
-          description: "Turn analysis into decisions with clear visualizations.",
-          tasks: [
-            "Choose useful business metrics",
-            "Build a dashboard",
-            "Explain three important insights"
-          ]
-        },
-        {
-          week: "Week 4",
-          title: "Portfolio and analyst interviews",
-          description: "Package your work into strong case studies.",
-          tasks: [
-            "Publish two data case studies",
-            "Practice business questions",
-            "Prepare an analyst portfolio"
-          ]
-        }
-      ],
-
-      product: [
-        {
-          week: "Week 1",
-          title: "Product discovery fundamentals",
-          description: "Turn customer conversations into product insights.",
-          tasks: [
-            "Create a user interview script",
-            "Conduct three user interviews",
-            "Group pain points into themes"
-          ]
-        },
-        {
-          week: "Week 2",
-          title: "Prioritization and product strategy",
-          description: "Make product decisions using evidence and constraints.",
-          tasks: [
-            "Learn RICE and Kano prioritization",
-            "Create a prioritization matrix",
-            "Write a one-page product strategy"
-          ]
-        },
-        {
-          week: "Week 3",
-          title: "Metrics, experiments, and roadmaps",
-          description: "Connect product decisions to measurable outcomes.",
-          tasks: [
-            "Define activation and retention metrics",
-            "Design a product experiment",
-            "Create a simple product roadmap"
-          ]
-        },
-        {
-          week: "Week 4",
-          title: "Product case study",
-          description: "Demonstrate structured product thinking.",
-          tasks: [
-            "Publish a product teardown",
-            "Present your product recommendation",
-            "Practice product interviews"
-          ]
-        }
-      ]
-    };
-
-    const skillData = {
-      frontend: [
-        ["HTML and CSS", 86, 90, "Strong foundation"],
-        ["JavaScript", 50, 88, "Priority gap"],
-        ["React", 35, 82, "Priority gap"],
-        ["Testing and performance", 25, 72, "Priority gap"],
-        ["Git and collaboration", 70, 78, "Nearly there"]
-      ],
-
-      data: [
-        ["SQL", 58, 88, "Developing"],
-        ["Python and pandas", 38, 78, "Priority gap"],
-        ["Data visualization", 34, 76, "Priority gap"],
-        ["Statistics", 44, 72, "Developing"],
-        ["Communication", 72, 84, "Nearly there"]
-      ],
-
-      product: [
-        ["User research", 62, 84, "Developing"],
-        ["Product strategy", 38, 86, "Priority gap"],
-        ["Prioritization", 42, 82, "Priority gap"],
-        ["Product analytics", 30, 76, "Priority gap"],
-        ["Communication", 79, 88, "Nearly there"]
-      ]
-    };
-
-    function getTrack(role) {
-      const text = role.toLowerCase();
-
-      if (text.includes("data") || text.includes("analyst")) {
-        return "data";
+    function setFile(file) {
+      if (!file) return;
+      if (file.type !== "application/pdf" && file.type !== "text/plain") {
+        fileName.textContent = "Please choose a PDF or TXT file.";
+        fileName.className = "mt-1 text-xs text-red-500";
+        return;
       }
-
-      if (text.includes("product") || text.includes("manager")) {
-        return "product";
-      }
-
-      return "frontend";
+      fileName.textContent = `${file.name} selected`;
+      fileName.className = "mt-1 text-xs font-semibold text-emerald-600";
     }
 
-    function renderSkills(track) {
-      const skills = skillData[track];
+    fileInput.addEventListener("change", (event) => setFile(event.target.files[0]));
 
-      const gaps = skills.filter(skill => skill[2] - skill[1] >= 25);
-      $("#gapCount").textContent = gaps.length;
+    ["dragenter", "dragover"].forEach((eventName) => {
+      dropZone.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        dropZone.classList.add("border-violet-500", "bg-violet-50");
+      });
+    });
 
-      $("#skillsList").innerHTML = skills.map(skill => {
-        const name = skill[0];
-        const current = skill[1];
-        const required = skill[2];
-        const status = skill[3];
-        const gap = required - current;
+    ["dragleave", "drop"].forEach((eventName) => {
+      dropZone.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        dropZone.classList.remove("border-violet-500", "bg-violet-50");
+      });
+    });
 
-        let badgeClass = "bg-emerald-100 text-emerald-700";
+    dropZone.addEventListener("drop", (event) => setFile(event.dataTransfer.files[0]));
 
-        if (status === "Developing" || status === "Nearly there") {
-          badgeClass = "bg-amber-100 text-amber-700";
-        }
+    // Theme
+    const savedTheme = localStorage.getItem("edupath-theme");
+    if (savedTheme === "dark") document.documentElement.classList.add("dark");
 
-        if (status === "Priority gap") {
-          badgeClass = "bg-rose-100 text-rose-700";
-        }
+    $("#themeBtn").addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+      localStorage.setItem(
+        "edupath-theme",
+        document.documentElement.classList.contains("dark") ? "dark" : "light"
+      );
+    });
+
+    // Generate path
+    $("#profileForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const button = $("#generateBtn");
+      const originalText = $("#generateText").textContent;
+      button.disabled = true;
+      $("#generateIcon").innerHTML = `<span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>`;
+      $("#generateText").textContent = "Analyzing your profile...";
+
+      setTimeout(() => {
+        const role = $("#role").value.trim() || "your target role";
+        const goal = $("#goal").value.trim();
+
+        $("#resultTitle").textContent = `Your path to becoming a ${role}`;
+        $("#resultSubtitle").textContent = goal
+          ? `A focused 4-week plan designed around your goal: “${goal}”.`
+          : "A focused 4-week plan designed around your goals.";
+
+        renderSkills();
+        renderRoadmap();
+        initializeChat();
+
+        $("#results").classList.remove("hidden");
+        $("#results").classList.add("animate-in");
+        $("#results").scrollIntoView({ behavior: "smooth", block: "start" });
+
+        button.disabled = false;
+        $("#generateIcon").textContent = "✦";
+        $("#generateText").textContent = originalText;
+      }, 1500);
+    });
+
+    function renderSkills() {
+      const skills = $("#skills").value.toLowerCase();
+
+      const strengths = [
+        skills.includes("javascript") ? "JavaScript fundamentals" : "Foundational technical experience",
+        skills.includes("css") || skills.includes("html") ? "Web development foundations" : "Problem-solving mindset",
+        "Ability to learn independently"
+      ];
+
+      const gaps = [
+        "Async JavaScript & error handling",
+        "React architecture and state",
+        "Performance and system design"
+      ];
+
+      $("#strengths").innerHTML = strengths.map((skill) => `
+        <div class="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
+          <span>✓</span>${skill}
+        </div>
+      `).join("");
+
+      $("#gaps").innerHTML = gaps.map((skill, index) => `
+        <div class="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-sm font-semibold text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+          <span>${index === 0 ? "↑" : "!"}</span>${skill}
+        </div>
+      `).join("");
+    }
+
+    function resourceIcon(type) {
+      return {
+        docs: "📘",
+        project: "🛠️",
+        practice: "⚡",
+        video: "▶️"
+      }[type] || "•";
+    }
+
+    function renderRoadmap() {
+      const roadmap = $("#roadmap");
+      roadmap.innerHTML = roadmapItems.map((week, weekIndex) => {
+        const doneCount = week.tasks.filter(task => task.done).length;
+        const progress = Math.round((doneCount / week.tasks.length) * 100);
 
         return `
-          <div class="fade-in">
-            <div class="flex items-center justify-between gap-3 mb-2">
-              <div class="flex items-center gap-2">
-                <strong class="text-sm">${name}</strong>
-                <span class="text-[10px] px-2 py-1 rounded-full font-bold ${badgeClass}">
-                  ${status}
-                </span>
+          <div class="rounded-2xl border border-slate-200 bg-white/60 p-4 dark:border-slate-700 dark:bg-slate-900/45">
+            <div class="mb-4 flex items-start gap-3">
+              <div class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-violet-100 text-xs font-black text-violet-700 dark:bg-violet-950/60 dark:text-violet-300">${weekIndex + 1}</div>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-violet-600">${week.week}</span>
+                    <h4 class="font-black">${week.title}</h4>
+                  </div>
+                  <span class="text-xs font-bold text-slate-400">${progress}%</span>
+                </div>
+                <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">${week.description}</p>
+                <div class="mt-3 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700">
+                  <div class="h-1.5 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 transition-all" style="width:${progress}%"></div>
+                </div>
               </div>
-
-              <span class="text-xs text-slate-500 dark:text-slate-400">
-                ${current}% / ${required}%
-              </span>
             </div>
 
-            <div class="relative h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div
-                class="absolute left-0 top-0 bottom-0 rounded-full bg-gradient-to-r from-brand to-cyan-400"
-                style="width:${current}%"
-              ></div>
-
-              <div
-                class="absolute top-0 bottom-0 border-r-2 border-slate-700 dark:border-white"
-                style="left:${required}%"
-              ></div>
-            </div>
-
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Gap to target: ${Math.max(gap, 0)} points
-            </p>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function renderRoadmap(track) {
-      const weeks = roadmapData[track];
-
-      $("#roadmap").innerHTML = weeks.map((week, weekIndex) => {
-        return `
-          <div class="relative pl-10 fade-in">
-            <div class="absolute left-0 top-0 w-8 h-8 rounded-xl ${
-              weekIndex === 0
-                ? "bg-brand text-white"
-                : "bg-slate-100 dark:bg-slate-800 text-slate-500"
-            } flex items-center justify-center text-xs font-black">
-              ${weekIndex + 1}
-            </div>
-
-            <div>
-              <p class="text-xs uppercase tracking-widest text-brand font-black">
-                ${week.week}
-              </p>
-
-              <h4 class="font-black mt-1">${week.title}</h4>
-
-              <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                ${week.description}
-              </p>
-            </div>
-
-            <div class="grid sm:grid-cols-2 gap-3 mt-4">
+            <div class="space-y-2">
               ${week.tasks.map((task, taskIndex) => `
-                <label class="flex gap-3 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-900/50 cursor-pointer hover:border-brand transition">
-                  <input
-                    type="checkbox"
-                    class="task-checkbox mt-1 accent-brand"
-                    ${weekIndex === 0 && taskIndex === 0 ? "checked" : ""}
-                  />
-
-                  <span class="text-sm">
-                    ${task}
-                    <span class="block text-xs text-slate-500 dark:text-slate-400 mt-2">
-                      Recommended activity
-                    </span>
+                <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-transparent p-2 transition hover:border-slate-200 hover:bg-white dark:hover:border-slate-700 dark:hover:bg-slate-800/60">
+                  <input type="checkbox" data-week="${weekIndex}" data-task="${taskIndex}" class="taskCheck mt-1 h-4 w-4 rounded border-slate-300 accent-violet-600" ${task.done ? "checked" : ""}>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-semibold ${task.done ? "text-slate-400 line-through" : ""}">${task.text}</span>
+                    <span class="mt-1 block text-xs text-slate-400">${resourceIcon(task.type)} ${task.resource}</span>
                   </span>
                 </label>
               `).join("")}
@@ -784,231 +573,97 @@
         `;
       }).join("");
 
-      document.querySelectorAll(".task-checkbox").forEach(checkbox => {
-        checkbox.addEventListener("change", updateProgress);
-      });
+      document.querySelectorAll(".taskCheck").forEach((checkbox) => {
+        checkbox.addEventListener("change", (event) => {
+          const weekIndex = Number(event.target.dataset.week);
+          const taskIndex = Number(event.target.dataset.task);
+          roadmapItems[weekIndex].tasks[taskIndex].done = event.target.checked;
+          renderRoadmap();
 
-      updateProgress();
-    }
-
-    function updateProgress() {
-      const allTasks = document.querySelectorAll(".task-checkbox");
-      const completedTasks = document.querySelectorAll(".task-checkbox:checked");
-
-      const total = allTasks.length;
-      const completed = completedTasks.length;
-      const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
-
-      $("#progressPercent").textContent = percentage + "%";
-      $("#progressBar").style.width = percentage + "%";
-      $("#taskCount").textContent = `${completed} / ${total}`;
-    }
-
-    function generatePlan() {
-      const role = $("#role").value.trim() || "Frontend Engineer";
-      const track = getTrack(role);
-
-      $("#generateText").textContent = "Analyzing...";
-      $("#spinner").classList.remove("hidden");
-
-      setTimeout(() => {
-        $("#resultRole").textContent = role;
-
-        renderSkills(track);
-        renderRoadmap(track);
-
-        $("#emptyState").classList.add("hidden");
-        $("#results").classList.remove("hidden");
-
-        $("#generateText").textContent = "Regenerate learning path";
-        $("#spinner").classList.add("hidden");
-
-        $("#results").scrollIntoView({
-          behavior: "smooth",
-          block: "start"
+          const total = roadmapItems.flatMap(week => week.tasks).length;
+          const complete = roadmapItems.flatMap(week => week.tasks).filter(task => task.done).length;
+          $("#completionBadge").textContent = `${Math.round((complete / total) * 100)}% complete`;
         });
-      }, 1200);
+      });
     }
 
-    function addChatMessage(message, sender) {
-      const chat = $("#chatMessages");
+    // Chat
+    function initializeChat() {
+      $("#chatMessages").innerHTML = "";
+      addMessage("agent", "Hi! I’m your EduPath Agent. I’ve mapped a four-week path based on your profile. Tell me how your learning is going, and I’ll adapt the plan with you.");
+      addMessage("agent", "A good first move is to complete the async JavaScript task in Week 1. You can check tasks off as you go.");
+    }
+
+    function addMessage(sender, text, typing = false) {
       const wrapper = document.createElement("div");
+      wrapper.className = `flex ${sender === "user" ? "justify-end" : "justify-start"} animate-in`;
 
-      if (sender === "user") {
-        wrapper.className = "flex justify-end gap-3 fade-in";
-
+      if (typing) {
         wrapper.innerHTML = `
-          <div class="max-w-[85%] bg-brand text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-6">
-            ${escapeHtml(message)}
-          </div>
-
-          <div class="w-8 h-8 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center text-[10px] font-black">
-            SA
+          <div class="flex max-w-[85%] items-center gap-1 rounded-2xl rounded-bl-md bg-slate-100 px-4 py-3 dark:bg-slate-800">
+            <span class="typing-dot h-1.5 w-1.5 rounded-full bg-slate-500"></span>
+            <span class="typing-dot h-1.5 w-1.5 rounded-full bg-slate-500"></span>
+            <span class="typing-dot h-1.5 w-1.5 rounded-full bg-slate-500"></span>
           </div>
         `;
       } else {
-        wrapper.className = "flex gap-3 fade-in";
-
-        wrapper.innerHTML = `
-          <div class="w-8 h-8 rounded-xl bg-brand/10 text-brand flex items-center justify-center text-xs font-black">
-            E
-          </div>
-
-          <div class="max-w-[85%] bg-slate-100 dark:bg-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-6">
-            ${message}
+        wrapper.innerHTML =600 text-white"
+            : "rounded-bl-md bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200"} px-4 py-3 text-sm leading-6">
+            ${text}
           </div>
         `;
       }
 
-      chat.appendChild(wrapper);
-      chat.scrollTop = chat.scrollHeight;
+      $("#chatMessages").appendChild(wrapper);
+      $("#chatMessages").scrollTop = $("#chatMessages").scrollHeight;
+      return wrapper;
     }
 
-    function getAgentReply(message) {
-      const text = message.toLowerCase();
+    function createAgentResponse(message) {
+      const lower = message.toLowerCase();
 
-      if (
-        text.includes("finished") ||
-        text.includes("completed") ||
-        text.includes("week 1")
-      ) {
-        const nextTask = document.querySelector(".task-checkbox:not(:checked)");
-
-        if (nextTask) {
-          nextTask.checked = true;
-          updateProgress();
-        }
-
-        return `
-          Great work! I marked your next task as complete.
-          Your progress is now <strong>${$("#progressPercent").textContent}</strong>.
-          Your next focus should be applying the concept in a small project.
-        `;
+      if (lower.includes("async") || lower.includes("promise") || lower.includes("struggl")) {
+        roadmapItems[0].tasks[0].done = false;
+        return "Async JavaScript is a common sticking point. I’ve kept1.";
       }
 
-      if (
-        text.includes("async") ||
-        text.includes("promise") ||
-        text.includes("javascript")
-      ) {
-        return `
-          Async JavaScript becomes easier when learned in this order:
-          <strong>callbacks → promises → async/await → error handling</strong>.
-          Build a small API project with loading, success, and error states.
-          I have prioritized JavaScript in your learning plan.
-        `;
+      if (lower.includes("finished") || lower.includes("complete") || lower.includes("done")) {
+        roadmapItems[0].tasks[0].done = true;
+        return "That’s great progress. I marked the first Week 1 task complete and your next priority is the API-powered dashboard. Keep it small: search input, loading state, results list, and an error state. Ship a basic version before polishing it.";
       }
 
-      if (
-        text.includes("project") ||
-        text.includes("practical") ||
-        text.includes("hands-on")
-      ) {
-        return `
-          I adapted your plan to be more project-based.
-          Spend about 20% of your time learning concepts and 80% building.
-          Try to produce one portfolio artifact every week.
-        `
-          Let’s reduce the workload.
-          Complete the first task from each week and focus on one strong
-          portfolio project. Consistent progress is better than an unrealistic schedule.
-        `;
-      }
-
-      return `
-        That makes sense. Try explaining the concept in your own words,
-        then create a small example without copying a tutorial.
-        I recommend adding that example to your current roadmap project.
-      `;
+      if (lower.includes("slow") || lower.includes("busy") || lower.includes("time")) {
+        roadmapItems[1].description = "Reduced scope: focus on reusable components and one state-management for a focused concept review, then immediately apply it in the API.round((complete / total) * 100)}% complete`;
+      }, 850);
     }
 
     function escapeHtml(value) {
-      return value.replace(/[&<>"']/g, character => {
-        const characters = {
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#039;"
-        };
-
-        return characters[character];
-      });
+      return value.replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
     }
 
-    // Theme toggle
-    $("#themeButton").addEventListener("click", () => {
-      document.documentElement.classList.toggle("dark");
-
-      $("#themeButton").textContent =
-        document.documentElement.classList.contains("dark")
-          ? "☀️"
-          : "🌙";
+    $("#chatForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      sendChat($("#chatInput").value);
     });
 
-    // Resume upload
-    $("#uploadArea").addEventListener("click", () => {
-      $("#resumeFile").click();
+    document.querySelectorAll(".promptBtn").forEach((button) => {
+      button.addEventListener("click", () => sendChat(button.dataset.prompt));
     });
 
-    $("#resumeFile").addEventListener("change", event => {
-      const file = event.target.files[0];
-
-      if (!example").forEach(button => {
-      button.addEventListener("click", () => {
-        const example = examples[button.dataset.type];
-
-        $("#skills").value = example.skills;
-        $("#role").value = example.role;
-        $("#goal").value = example.goal;
-        $("#resumeText").value = example.resume;
-      });
-    });
-
-    // Generate roadmap
-    $("#generateButton").addEventListener("click", generatePlan);
-
-    // Reset app
-    $("#resetButton").addEventListener("click", () => {
+    $("#resetBtn").addEventListener("click", () => {
       $("#results").classList.add("hidden");
-      $("#emptyState").classList.remove("hidden");
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
+      $("#setup").scrollIntoView({ behavior: "smooth" });
+      roadmapItems.forEach(week => week.tasks.forEach(task => task.done = false));
+      $("#profileForm").reset();
+      fileName.textContent = "PDF up to 10 MB, or paste your resume text below";
+      fileName.className = "mt-1 text-xs text-slate-500 dark:text-slate-400";
     });
-
-    // Chat preset buttons
-    document.querySelectorAll(".prompt").forEach(button => {
-      button.addEventListener("click", input.value.trim();
-
-      if (!message) return;
-
-      addChatMessage(message, "user");
-      input.value = "";
-
-      const typing = document.createElement("div");
-
-      typing.id = "typing";
-      typing.className = "flex gap-3 fade-in";
-
-      typing.innerHTML = `
-        <div class="w-8 h-8 rounded-xl bg-brand/10 text-brand flex items-center justify-center text-xs font-black">
-          E
-        </div>
-
-        <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl px-4 py-3 text-sm">
-          EduPath is thinking...
-        </div>
-      `;
-
-      $("#chatMessages").appendChild(typing);
-
-      setTimeout(() => {
-        typing.remove();
-        addChatMessage(getAgentReply(message), "agent");
-      }, 800);
-    });
-
-    // Ctrl + Enter sends chat      if ((html>
+  </script>
+</body>
+</html>
